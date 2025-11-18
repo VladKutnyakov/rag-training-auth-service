@@ -3,10 +3,10 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"os"
+
+	"rag-training-auth-service/internal/utils"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/joho/godotenv"
 )
 
 type PostgresDB struct {
@@ -22,7 +22,11 @@ type dbConfig struct {
 }
 
 func Init() (*PostgresDB, error) {
-	config := getConfig()
+	config, err := getConfig()
+	if err != nil {
+		return nil, fmt.Errorf("не собрать конфигурацию подключения к PostgreSQL: %w", err)
+	}
+
 	connStr := getConnectString(config)
 
 	ctx := context.Background()
@@ -53,23 +57,34 @@ func getConnectString(config *dbConfig) string {
 	)
 }
 
-func getConfig() *dbConfig {
-	_ = godotenv.Load()
-
+func getConfig() (*dbConfig, error) {
 	var config dbConfig
+	var err error = nil
 
-	config.host = getEnv("DB_HOST", "localhost")
-	config.port = getEnv("DB_PORT", "5432")
-	config.user = getEnv("DB_USER", "postgres")
-	config.password = getEnv("DB_PASSWORD", "postgres")
-	config.dbname = getEnv("DB_NAME", "myapp")
-
-	return &config
-}
-
-func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
+	config.host, err = utils.GetEnv("DB_HOST")
+	if err != nil {
+		return &dbConfig{}, err
 	}
-	return fallback
+
+	config.port, err = utils.GetEnv("DB_PORT")
+	if err != nil {
+		return &dbConfig{}, err
+	}
+
+	config.user, err = utils.GetEnv("DB_USER")
+	if err != nil {
+		return &dbConfig{}, err
+	}
+
+	config.password, err = utils.GetEnv("DB_PASSWORD")
+	if err != nil {
+		return &dbConfig{}, err
+	}
+
+	config.dbname, err = utils.GetEnv("DB_NAME")
+	if err != nil {
+		return &dbConfig{}, err
+	}
+
+	return &config, err
 }
