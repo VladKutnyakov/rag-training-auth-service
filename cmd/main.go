@@ -27,6 +27,7 @@ func main() {
 	authHandler := &handlers.AuthHandler{DB: db.Conn}
 	http.HandleFunc("POST /register", authHandler.Register)
 	http.HandleFunc("POST /login", authHandler.Login)
+	http.HandleFunc("GET /validate", authHandler.Validate)
 
 	fmt.Println("Starting server at port 8090")
 	err = http.ListenAndServe(":8090", nil)

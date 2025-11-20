@@ -92,3 +92,29 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func (h *AuthHandler) Validate(w http.ResponseWriter, r *http.Request) {
+	tokenStr := ""
+
+	authHeader := r.Header.Get("Authorization")
+	if authHeader != "" && len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		tokenStr = authHeader[7:]
+	}
+
+	if tokenStr == "" {
+		http.Error(w, "Header \"Authorization\" or token not found", http.StatusUnauthorized)
+		return
+	}
+
+	token, err := utils.ValidateJWT(tokenStr)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	if !token.Valid {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+}

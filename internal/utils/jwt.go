@@ -2,16 +2,23 @@ package utils
 
 import (
 	"github.com/golang-jwt/jwt/v5"
-	"golang.org/x/crypto/bcrypt"
 )
 
-func ValidateJWT(hash, password []byte) (bool, error) {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err != nil, err
+func ValidateJWT(hash string) (*jwt.Token, error) {
+	token, err := jwt.Parse(hash, func(token *jwt.Token) (any, error) {
+		secret, err := getSecret()
+		return []byte(secret), err
+	})
+	return token, err
+}
+
+func getSecret() (string, error) {
+	secret, err := GetEnv("JWT_SECRET")
+	return secret, err
 }
 
 func GenerateJWT(claims jwt.MapClaims) (string, error) {
-	secret, err := GetEnv("JWT_SECRET")
+	secret, err := getSecret()
 	if err != nil {
 		return "", err
 	}
