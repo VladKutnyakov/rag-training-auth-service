@@ -24,4 +24,4 @@ docker-push:
 
 ## docker-run: Запустить контейнер (порт 8080 → 8080)
 docker-run:
-	docker run --rm -p 8080:8080 --env-file .env rag-training/$(BINARY_NAME)
+	docker run --rm -d -p 8080:8080 --env-file .env rag-training/$(BINARY_NAME)
