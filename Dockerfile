@@ -9,4 +9,5 @@ RUN go build -o main cmd/main.go
 FROM alpine
 WORKDIR /build
 COPY --from=build-stage /build/main /build/main
+COPY --from=builder /app/migrations ./migrations
 CMD ["./main"]

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"rag-training-auth-service/internal/handlers"
-	postgres "rag-training-auth-service/internal/storage"
+	"rag-training-auth-service/internal/storage"
 
 	"github.com/joho/godotenv"
 )
@@ -14,7 +14,7 @@ import (
 func main() {
 	_ = godotenv.Load()
 
-	db, err := postgres.Init()
+	db, err := storage.Init()
 	if err != nil {
 		log.Fatalf("Ошибка инициализации БД: %v", err)
 	}
@@ -24,14 +24,16 @@ func main() {
 		}
 	}()
 
-	authHandler := &handlers.AuthHandler{DB: db.Conn}
+	storage.RunMigrations(db)
+
+	authHandler := &handlers.AuthHandler{DB: db.Pool}
 	http.HandleFunc("POST /register", authHandler.Register)
 	http.HandleFunc("POST /login", authHandler.Login)
 	http.HandleFunc("GET /validate", authHandler.Validate)
 
-	fmt.Println("Starting server at port 8090")
+	fmt.Println("Запуск сервера на порту 8090")
 	err = http.ListenAndServe(":8090", nil)
 	if err != nil {
-		fmt.Println("Error starting the server:", err)
+		fmt.Println("Ошибка запуска сервера:", err)
 	}
 }

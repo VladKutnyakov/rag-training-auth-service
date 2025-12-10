@@ -8,12 +8,12 @@ import (
 	"rag-training-auth-service/internal/utils"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthHandler struct {
-	DB *pgx.Conn
+	DB *pgxpool.Pool
 }
 
 type UserCredentials struct {
@@ -32,7 +32,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if exists {
-		http.Error(w, "User already exists", http.StatusBadRequest)
+		http.Error(w, "Пользователь уже существует", http.StatusBadRequest)
 		return
 	}
 
@@ -49,7 +49,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "User created"})
+	json.NewEncoder(w).Encode(map[string]string{"message": "Пользователь создан"})
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +64,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(req.Password)); err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		http.Error(w, "Неверный пароль", http.StatusUnauthorized)
 		return
 	}
 

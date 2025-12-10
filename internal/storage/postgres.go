@@ -1,16 +1,15 @@
-package postgres
+package storage
 
 import (
 	"context"
 	"fmt"
-
 	"rag-training-auth-service/internal/utils"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type PostgresDB struct {
-	Conn *pgx.Conn
+	Pool *pgxpool.Pool
 }
 
 type dbConfig struct {
@@ -30,22 +29,22 @@ func Init() (*PostgresDB, error) {
 	connStr := getConnectString(config)
 
 	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, connStr)
+	dbpool, err := pgxpool.New(ctx, connStr)
 	if err != nil {
 		return nil, fmt.Errorf("не удалось подключиться к PostgreSQL: %w", err)
 	}
 
-	if err := conn.Ping(ctx); err != nil {
-		conn.Close(ctx)
+	if err := dbpool.Ping(ctx); err != nil {
+		dbpool.Close()
 		return nil, fmt.Errorf("проверка подключения не удалась: %w", err)
 	}
 
-	return &PostgresDB{Conn: conn}, nil
+	return &PostgresDB{Pool: dbpool}, nil
 }
 
 func (db *PostgresDB) Close() error {
-	if db.Conn != nil {
-		return db.Conn.Close(context.Background())
+	if db.Pool != nil {
+		db.Pool.Close()
 	}
 	return nil
 }
