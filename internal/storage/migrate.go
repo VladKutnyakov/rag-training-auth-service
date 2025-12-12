@@ -24,6 +24,4 @@ func RunMigrations(db *PostgresDB) {
 	goose.Status(dbStd, ".")
 
 	log.Println("Миграции применены")
-
-	db.Close()
 }

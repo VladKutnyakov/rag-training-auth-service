@@ -8,6 +8,7 @@ import (
 	"rag-training-auth-service/internal/utils"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -26,7 +27,10 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&req)
 
 	var exists bool
-	err := h.DB.QueryRow(r.Context(), "SELECT EXISTS(SELECT 1 FROM users WHERE username = $1)", req.Username).Scan(&exists)
+	args := pgx.NamedArgs{
+		"username": req.Username,
+	}
+	err := h.DB.QueryRow(r.Context(), "SELECT EXISTS(SELECT 1 FROM users WHERE username = @username)", args).Scan(&exists)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -42,7 +46,11 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.DB.Exec(r.Context(), "INSERT INTO users (username, password_hash) VALUES ($1, $2)", req.Username, hash)
+	args = pgx.NamedArgs{
+		"username":      req.Username,
+		"password_hash": hash,
+	}
+	_, err = h.DB.Exec(r.Context(), "INSERT INTO users (username, password_hash) VALUES (@username, @password_hash)", args)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -57,7 +65,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&req)
 
 	var hash string
-	err := h.DB.QueryRow(r.Context(), "SELECT password_hash FROM users WHERE username = $1", req.Username).Scan(&hash)
+	args := pgx.NamedArgs{
+		"username": req.Username,
+	}
+	err := h.DB.QueryRow(r.Context(), "SELECT password_hash FROM users WHERE username = @username", args).Scan(&hash)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

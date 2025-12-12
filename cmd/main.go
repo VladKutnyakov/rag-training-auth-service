@@ -19,6 +19,7 @@ func main() {
 		log.Fatalf("Ошибка инициализации БД: %v", err)
 	}
 	defer func() {
+		fmt.Println("Закрытие соединения с БД")
 		if err := db.Close(); err != nil {
 			log.Printf("Ошибка при закрытии соединения с БД: %v", err)
 		}

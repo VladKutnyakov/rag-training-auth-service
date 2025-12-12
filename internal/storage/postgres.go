@@ -18,6 +18,7 @@ type dbConfig struct {
 	user     string
 	password string
 	dbname   string
+	schema   string
 }
 
 func Init() (*PostgresDB, error) {
@@ -51,8 +52,8 @@ func (db *PostgresDB) Close() error {
 
 func getConnectString(config *dbConfig) string {
 	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s",
-		config.user, config.password, config.host, config.port, config.dbname,
+		"postgres://%s:%s@%s:%s/%s?search_path=%s",
+		config.user, config.password, config.host, config.port, config.dbname, config.schema,
 	)
 }
 
@@ -81,6 +82,11 @@ func getConfig() (*dbConfig, error) {
 	}
 
 	config.dbname, err = utils.GetEnv("DB_NAME")
+	if err != nil {
+		return &dbConfig{}, err
+	}
+
+	config.schema, err = utils.GetEnv("DB_SCHEMA")
 	if err != nil {
 		return &dbConfig{}, err
 	}

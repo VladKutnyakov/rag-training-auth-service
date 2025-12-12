@@ -4,11 +4,11 @@ BINARY_NAME := rt-auth-service
 
 ## build: Собрать бинарник
 build:
-	go build -o bin/$(BINARY_NAME) ./cmd
+	go build -o bin/$(BINARY_NAME) ./cmd/main.go
 
 ## run: Запустить сервис
 run:
-	go run ./cmd
+	go run ./cmd/main.go
 
 ## clean: Удалить бинарник
 clean:
