@@ -30,6 +30,7 @@ func main() {
 	authHandler := &handlers.AuthHandler{DB: db.Pool}
 	http.HandleFunc("POST /register", authHandler.Register)
 	http.HandleFunc("POST /login", authHandler.Login)
+	http.HandleFunc("POST /logout", authHandler.Logout)
 	http.HandleFunc("GET /validate", authHandler.Validate)
 
 	fmt.Println("Запуск сервера на порту 8090")

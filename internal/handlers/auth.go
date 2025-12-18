@@ -104,6 +104,21 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+
+	cookie := &http.Cookie{
+		Name:     "token",
+		Value:    "",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteStrictMode,
+	}
+	http.SetCookie(w, cookie)
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func (h *AuthHandler) Validate(w http.ResponseWriter, r *http.Request) {
 	tokenStr := ""
 
